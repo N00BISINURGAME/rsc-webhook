@@ -11,29 +11,32 @@ app.post("/stripe-webhook", async (req, res) => {
     if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
-        const message = {
-            embeds: [
+      const productName = session.metadata?.product_name || "RSC Product";
+
+const message = {
+    embeds: [
+        {
+            title: "🚨 RSC ORDER ALERT",
+            description: `**${productName}** was just purchased!`,
+            color: 16711680,
+            fields: [
                 {
-                    title: "📦 New RSC Order",
-                    color: 16711680,
-                    fields: [
-                        {
-                            name: "Customer",
-                            value: session.customer_details?.email || "Unknown",
-                            inline: true
-                        },
-                        {
-                            name: "Amount",
-                            value: `$${(session.amount_total / 100).toFixed(2)}`,
-                            inline: true
-                        }
-                    ],
-                    footer: {
-                        text: "RSC Production Services"
-                    }
+                    name: "Status",
+                    value: "✅ Order Confirmed",
+                    inline: true
+                },
+                {
+                    name: "Time",
+                    value: "Just now",
+                    inline: true
                 }
-            ]
-        };
+            ],
+            footer: {
+                text: "RSC Production Services"
+            }
+        }
+    ]
+};
 
         await fetch(DISCORD_WEBHOOK, {
             method: "POST",
